@@ -1,0 +1,77 @@
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: section;
+  position: relative;
+}
+
+header {
+  /* -webkit-animation-duration: 1s; */
+  /* -webkit-animation-name: slidein; */
+  /* -webkit-animation-iteration-count: infinite; */
+  /* -webkit-animation-direction: alternate; */
+}
+
+@-webkit-keyframes slidein {
+  from {
+    margin-bottom: 40px;
+  }
+  to {
+    margin-bottom: 0px;
+  }
+}
+
+li {
+  /* border: solid 1px #ddd; */
+  position: relative;
+  overflow: hidden;
+  display: block;
+  background-color: white;
+  opacity: 1;
+  -webkit-transition: -webkit-transform 200ms, background-color 400ms, opacity 450ms;
+}
+
+.remove {
+  display: inline-block;
+  float: right;
+  line-height: 30px;
+  width: 30px;
+  text-align: center;
+}
+
+.active {
+  background-color: #eee;
+}
+
+.handle {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 30px;
+  /* line-height: 30px; */
+  background-color: #ddd;
+  cursor: hand;
+  vertical-align: middle;
+  border: solid 2px white;
+}
+
+label:before {
+  counter-increment: section;
+  content: counter(section);
+  background-color: black;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  line-height: 20px;
+  text-align: center;
+  display: inline-block;
+}
