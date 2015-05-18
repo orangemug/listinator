@@ -114,11 +114,62 @@ function addDragHandler(el, els, bbox) {
 }
 
 
+function removeDragHandler(el) {
+  handlers.forEach(function(obj) {
+    if(obj.el === el) {
+      window.removeEventListener("mousemove", obj.hdl, false);
+      window.removeEventListener("touchmove", obj.hdl, false);
+    }
+  });
+}
+
+
 
 /**
  * ===================
  */
-function remove(el) {
+var handlers = [];
+
+
+function Listinator(selector, scope) {
+  scope = scope || document.body;
+  var self = this;
+
+  var delegate = new Delegate(scope);
+  delegate.on('mousedown', selector, function(e, target) {
+    self.select(target.parentNode);
+
+    // TODO: Kinda hate this...
+    document.body.style.webkitUserSelect = "none";
+
+    window.addEventListener("mouseup", function hdl() {
+      self.unselect(target.parentNode);
+      document.body.style.webkitUserSelect = "";
+      window.removeEventListener("mouseup", hdl, false);
+    }, false);
+  });
+
+  delegate.on('touchstart', selector, function(e, target) {
+    if(e.touches.length > 1) return;
+
+    self.select(target.parentNode);
+    document.body.style.webkitUserSelect = "none";
+
+    window.addEventListener("touchend", function hdl() {
+      self.unselect(target.parentNode);
+      document.body.style.webkitUserSelect = "";
+      window.removeEventListener("mouseup", hdl, false);
+    }, false);
+  });
+
+  delegate.on('click', '.remove', function(e, target) {
+    self.remove(target.parentNode);
+  });
+}
+
+util.inherits(Listinator, events.EventEmitter);
+
+Listinator.prototype.remove = function(el) {
   // TODO: Check if it has a transition
   el.addEventListener("webkitTransitionEnd", function() {
     el.parentNode.removeChild(el);
@@ -126,7 +177,7 @@ function remove(el) {
   el.style.opacity = 0;
 }
 
-function select(el) {
+Listinator.prototype.select = function(el) {
   var els = Array.prototype.slice.call(el.parentNode.children);
   el.style.zIndex = 999999;
   el.style.webkitTransition = "none";
@@ -137,7 +188,7 @@ function select(el) {
   addDragHandler(el, els, bbox);
 }
 
-function unselect(el) {
+Listinator.prototype.unselect = function(el) {
   var els = Array.prototype.slice.call(el.parentNode.children);
   el.classList.remove("active");
   el.style.webkitTransition = "";
@@ -146,60 +197,10 @@ function unselect(el) {
   removeTransforms(els);
 }
 
-var handlers = [];
-
-
-function removeDragHandler(el) {
-  handlers.forEach(function(obj) {
-    if(obj.el === el) {
-      window.removeEventListener("mousemove", obj.hdl, false);
-      window.removeEventListener("touchmove", obj.hdl, false);
-    }
-  });
-}
-
-function attach(selector, scope) {
-  scope = scope || document.body;
-
-  var delegate = new Delegate(scope);
-  delegate.on('mousedown', selector, function(e, target) {
-    select(target.parentNode);
-
-    // TODO: Kinda hate this...
-    document.body.style.webkitUserSelect = "none";
-
-    window.addEventListener("mouseup", function hdl() {
-      unselect(target.parentNode);
-      document.body.style.webkitUserSelect = "";
-      window.removeEventListener("mouseup", hdl, false);
-    }, false);
-  });
-
-  delegate.on('touchstart', selector, function(e, target) {
-    if(e.touches.length > 1) return;
-
-    select(target.parentNode);
-    document.body.style.webkitUserSelect = "none";
-
-    window.addEventListener("touchend", function hdl() {
-      unselect(target.parentNode);
-      document.body.style.webkitUserSelect = "";
-      window.removeEventListener("mouseup", hdl, false);
-    }, false);
-  });
-
-  delegate.on('click', '.remove', function(e, target) {
-    remove(target.parentNode);
-  });
-
-  return {
-    detach: function() {
-      delegate.destroy();
-    }
-  }
-}
 
 
 module.exports = {
-  attach: attach
-}
+  attach: function(selector, scope) {
+    return new Listinator(selector, scope);
+  }
+};
