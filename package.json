@@ -1,4 +1,7 @@
 {
   "name": "listinator",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "dependencies": {
+    "dom-delegate": "git://github.com/orangemug/dom-delegate.git"
+  }
 }
