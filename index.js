@@ -170,10 +170,24 @@ function Listinator(selector, scope) {
 util.inherits(Listinator, events.EventEmitter);
 
 Listinator.prototype.remove = function(el) {
+  var s = window.getComputedStyle(el);
   // TODO: Check if it has a transition
-  el.addEventListener("webkitTransitionEnd", function() {
+  function hdl() {
     el.parentNode.removeChild(el);
-  }, false);
+  }
+
+  var hasTransition = false;
+  s.webkitTransition.split(/\s*,\s*/).forEach(function(item) {
+    if(item.match(/^opacity/)) {
+      hasTransition = true;
+    }
+  });
+
+  if(hasTransition) {
+    el.addEventListener("webkitTransitionEnd", hdl, false);
+  } else {
+    process.nextTick(hdl);
+  }
   el.style.opacity = 0;
 }
 
